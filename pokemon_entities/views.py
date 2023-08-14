@@ -14,6 +14,11 @@ DEFAULT_IMAGE_URL = (
     '&fill=transparent'
 )
 
+def get_photo_url(request,pokemon):
+    if pokemon.photo:
+        return request.build_absolute_uri(pokemon.photo.url)
+    else:
+        return DEFAULT_IMAGE_URL
 
 def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
     icon = folium.features.CustomIcon(
@@ -34,7 +39,7 @@ def show_all_pokemons(request):
                                                   disappeared_at__gte=time)
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     for pokemon in active_pokemons:
-        pokemon_url = request.build_absolute_uri(pokemon.pokemon.photo.url)
+        pokemon_url = get_photo_url(request, pokemon.pokemon)
         add_pokemon(
             folium_map, pokemon.latitude,
             pokemon.longitude,
@@ -59,15 +64,23 @@ def show_all_pokemons(request):
 
 def show_pokemon(request, pokemon_id):
     requested_pokemon = get_object_or_404(Pokemon, id=int(pokemon_id))
-    pokemon_url = request.build_absolute_uri(requested_pokemon.photo.url)
+    pokemon_url = get_photo_url(request, requested_pokemon)
     pokemon = {
         'pokemon_id': requested_pokemon.id,
         'title_ru': requested_pokemon.title_ru,
         'title_en': requested_pokemon.title_en,
         'title_jp': requested_pokemon.title_jp,
         'description': requested_pokemon.describe,
-        'img_url': pokemon_url
+        'img_url': pokemon_url,
     }
+    previous_evolution = requested_pokemon.previous_evolution
+    if previous_evolution:
+        pokemon_previous_evolution_url = get_photo_url(request, previous_evolution)
+        pokemon['previous_evolution'] = {
+            'title_ru': requested_pokemon.previous_evolution,
+            'pokemon_id': previous_evolution.id,
+            'img_url': pokemon_previous_evolution_url
+            }
 
     time = localtime()
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
@@ -76,7 +89,7 @@ def show_pokemon(request, pokemon_id):
     for entity_pokemon in active_pokemons:
         add_pokemon(
             folium_map, entity_pokemon.latitude,
-            requested_pokemon.longitude,
+            entity_pokemon.longitude,
             pokemon_url
         )
 
