@@ -14,11 +14,12 @@ DEFAULT_IMAGE_URL = (
     '&fill=transparent'
 )
 
-def get_photo_url(request,pokemon):
-    if pokemon.photo:
-        return request.build_absolute_uri(pokemon.photo.url)
-    else:
+
+def get_photo_url(request, pokemon):
+    if not pokemon.photo:
         return DEFAULT_IMAGE_URL
+    return request.build_absolute_uri(pokemon.photo.url)
+
 
 def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
     icon = folium.features.CustomIcon(
