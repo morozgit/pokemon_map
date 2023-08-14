@@ -2,15 +2,18 @@ from django.db import models  # noqa F401
 
 
 class Pokemon(models.Model):
-    title = models.CharField(max_length=200)
+    title_ru = models.CharField(max_length=200)
+    title_en = models.CharField(max_length=200)
+    title_jp = models.CharField(max_length=200)
+    describe = models.TextField(max_length=1000)
     photo = models.ImageField(upload_to='pokemon', null=True)
 
     def __str__(self) -> str:
-        return "{}".format(self.title)
+        return "{}".format(self.title_ru)
 
 
 class PokemonEntity(models.Model):
-    pockemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE, related_name="entities",)
+    pokemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE, related_name="entities",)
     latitude = models.FloatField()
     longitude = models.FloatField()
     appeared_at = models.DateTimeField()
